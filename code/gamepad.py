@@ -24,6 +24,11 @@ BTN_Z_R = 11
 BTN_13 = 12
 BTN_14 = 13
 
+NOT_CONNECTED = 0b000
+MEGADRIVE = 0b001
+SUPER_NES = 0b010
+SATURN = 0b011
+
 PAD_3B_CONTROLLER_NAME = "3B controller"
 
 Pad3Bcontroller = { "1" : BTN_B, "2" : BTN_A, "5" : BTN_C_L, "9" : BTN_START, "0_-1" : LEFT, "0_1" : RIGHT, "0_0" : RELEASE_H, "1_-1" : UP, "1_1" : DOWN, "1_0" : RELEASE_V }
@@ -97,10 +102,32 @@ def manageAxis(axis, value):
   except KeyError:
     print(f"Not managed axis {value}")
 
+def readPadAdapter():
+  GPIO.setup(21, GPIO.IN)
+  GPIO.setup(22, GPIO.IN)
+  GPIO.setup(23, GPIO.IN)
+  d1 = 0
+  d2 = 0
+  d3 = 0
+  if GPIO.input(21):
+    d1 = 1
+  if GPIO.input(22):
+    d2 = 1
+  if GPIO.input(23):
+    d3 = 1
+  value = (d3 << 2) | (d2 << 1) | d1
+  print(f"Adapter = {bin(value)}")
+
 def main():
   print("!!!!!!!!!!!!!! START !!!!!!!!!!!!!!")
+
+  GPIO.setmode(GPIO.BOARD )
+  # Read pad adapter
+  readPadAdapter()
+
   # Initialize Joystick(s).
   pygame.init()
+
   while True:
     for event in pygame.event.get():
       if event.type == pygame.JOYAXISMOTION:
