@@ -60,6 +60,7 @@ def getBtnName(btn):
     return "Not assigned"
 
 def pressButton(btn):
+  print(connectedPad)
   btnValue = connectedPad[btn]
   btnName = getBtnName(btnValue)
   print(f"Joystick button {btnName} pressed.")
@@ -70,9 +71,12 @@ def releaseButton(btn):
   print(f"Joystick button {btnName} released.")
 
 def main():
+  print("!!!!!!!!!!!!!! START !!!!!!!!!!!!!!")
   # Initialize Joystick(s).
+  connectedPad["0"] = 0
+  print(connectedPad)
   pygame.init()
-  # connectedPad = {}
+  connectedPad = {}
   while True:
     for event in pygame.event.get():
       if event.type == pygame.JOYAXISMOTION:
@@ -93,9 +97,10 @@ def main():
           # joystick, filling up the list without needing to create them manually.
           joy = pygame.joystick.Joystick(event.device_index)
           joysticks[joy.get_instance_id()] = joy
-          print(f"Joystick {joy.get_instance_id()} connencted")
+          print(f"Joystick {joy.get_instance_id()} connected")
           if (joy.get_name() == PAD_3B_CONTROLLER_NAME):
             print(f"{joy.get_name()} connected")
+            print(connectedPad)
             # connectedPad = Pad3Bcontroller
             connectedPad.update(Pad3Bcontroller)
           else:
