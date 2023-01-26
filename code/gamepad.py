@@ -7,7 +7,8 @@ import RPi.GPIO as GPIO
 # Import the time library for time functions.
 #from time import sleep
 
-NOT_ASSIGNED = -1
+RELEASE_H = -2
+RELEASE_V = -1
 UP = 0
 DOWN = 1
 LEFT = 2
@@ -25,15 +26,11 @@ BTN_14 = 13
 
 PAD_3B_CONTROLLER_NAME = "3B controller"
 
-noPad = [ NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED ]
-# Pad3Bcontroller = [ LEFT, RIGHT, UP, DOWN, BTN_B, BTN_A, NOT_ASSIGNED, NOT_ASSIGNED, BTN_C_L, NOT_ASSIGNED, NOT_ASSIGNED, NOT_ASSIGNED, BTN_START, NOT_ASSIGNED ]
-Pad3Bcontroller = { "1" : BTN_B, "2" : BTN_A }
+Pad3Bcontroller = { "1" : BTN_B, "2" : BTN_A, "5" : BTN_C_L, "9" : BTN_START, "0_-1" : LEFT, "0_1" : RIGHT, "0_0" : RELEASE_H, "1_-1" : UP, "1_1" : DOWN, "1_0" : RELEASE_V }
+
+pad = {}
 
 joysticks = {}
-connectedPad = {}
-
-# connectedPad = noPad
-connectedPad = { "1" : BTN_B, "2" : BTN_A }
 
 def getBtnName(btn):
   if btn == BTN_START:
@@ -59,37 +56,61 @@ def getBtnName(btn):
   else:
     return "Not assigned"
 
+def getAxisAction(value):
+  if value == LEFT:
+    return "Press left\nRelease right"
+  elif value == RIGHT:
+    return "Release left\nPress right"
+  elif value == RELEASE_H:
+    return "Release left\nRelease right"
+  elif value == UP:
+    return "Press up\nRelease down"
+  elif value == DOWN:
+    return "Release up\nPress down"
+  elif value == RELEASE_V:
+    return "Release up\nRelease down"
+  else:
+    return f"Not assigned {value}"
+
 def pressButton(btn):
-  print(connectedPad)
-  btnValue = connectedPad[btn]
-  btnName = getBtnName(btnValue)
-  print(f"Joystick button {btnName} pressed.")
+  try:
+    btnValue = pad[btn]
+    btnName = getBtnName(btnValue)
+    print(f"Joystick button {btnName} pressed.")
+  except KeyError:
+    print(f"Not managed key {btn}")
 
 def releaseButton(btn):
-  btnValue = connectedPad[btn]
-  btnName = getBtnName(btnValue)
-  print(f"Joystick button {btnName} released.")
+  try:
+    btnValue = pad[btn]
+    btnName = getBtnName(btnValue)
+    print(f"Joystick button {btnName} released.")
+  except KeyError:
+    print(f"Not managed key {btn}")
+
+def manageAxis(axis, value):
+  value = f"{axis}_{value}"
+  try:
+    btnValue = pad[value]
+    action = getAxisAction(btnValue)
+    print(f"{action}")
+  except KeyError:
+    print(f"Not managed axis {value}")
 
 def main():
   print("!!!!!!!!!!!!!! START !!!!!!!!!!!!!!")
   # Initialize Joystick(s).
-  connectedPad["0"] = 0
-  print(connectedPad)
   pygame.init()
-  connectedPad = {}
   while True:
     for event in pygame.event.get():
       if event.type == pygame.JOYAXISMOTION:
-        print(f"Joystick axis {event.axis} value  {round(event.value)}")
+        manageAxis(event.axis, round(event.value))
 
       if event.type == pygame.JOYBUTTONDOWN:
-        # pressButton(event.button):
         pressButton(f"{event.button}")
-        # print(f"Joystick button {event.button} pressed.")
 
       if event.type == pygame.JOYBUTTONUP:
-        # releaseButton(event.button)
-        print(f"Joystick button {event.button} released.")
+        releaseButton(f"{event.button}")
 
       # Handle hotplugging
       if event.type == pygame.JOYDEVICEADDED:
@@ -100,17 +121,14 @@ def main():
           print(f"Joystick {joy.get_instance_id()} connected")
           if (joy.get_name() == PAD_3B_CONTROLLER_NAME):
             print(f"{joy.get_name()} connected")
-            print(connectedPad)
-            # connectedPad = Pad3Bcontroller
-            connectedPad.update(Pad3Bcontroller)
+            pad.update(Pad3Bcontroller)
           else:
             print(f"Unknown gamepad")
-            # connectedPad = noPad
-            connectedPad.clear()
+            pad.clear()
 
       if event.type == pygame.JOYDEVICEREMOVED:
         del joysticks[event.instance_id]
-        connectedPad = noPad
+        pad.clear()
         print(f"Joystick {event.instance_id} disconnected")
 
 main()
