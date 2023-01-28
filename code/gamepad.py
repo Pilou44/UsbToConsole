@@ -80,6 +80,16 @@ def manageAxis(axis, value):
   except KeyError:
     print(f"Not managed axis {value}")
 
+def manageHat(hat, value):
+  value = f"H{hat}_{value}"
+  try:
+    btnValue = pad[value]
+    action = getAxisAction(btnValue)
+    print(f"{action}")
+    adapter.performAction(btnValue)
+  except KeyError:
+    print(f"Not managed hat {value}")
+
 def main():
   print("!!!!!!!!!!!!!! START !!!!!!!!!!!!!!")
 
@@ -91,6 +101,10 @@ def main():
 
   while True:
     for event in pygame.event.get():
+      if event.type == pygame.JOYHATMOTION:
+        manageHat(event.hat, round(event.value))
+        print(f"hat event hat: {event.hat}, value: {event.value}")
+
       if event.type == pygame.JOYAXISMOTION:
         manageAxis(event.axis, round(event.value))
 
@@ -106,7 +120,8 @@ def main():
           # joystick, filling up the list without needing to create them manually.
           joy = pygame.joystick.Joystick(event.device_index)
           joysticks[joy.get_instance_id()] = joy
-          print(f"Joystick {joy.get_instance_id()} connected")
+          name = joy.get_name()
+          print(f"Joystick {joy.get_instance_id()} connected\nname: {name}, id: {joy.get_id()}, guid: {joy.get_guid()}\naxes: {joy.get_numaxes()}, buttons: {joy.get_numbuttons()}, balls: {joy.get_numballs()}, hats: {joy.get_numhats()}")
           for controller in controllers:
             if controller.name == joy.get_name():
               print(f"{joy.get_name()} connected")
