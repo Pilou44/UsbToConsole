@@ -10,8 +10,10 @@ from actions import *
 controllers = { MD3Buttons, RetroflagSnes, }
 
 pad = {}
-
 joysticks = {}
+
+currentGuid = ""
+currentAdapter = -1
 
 def getBtnName(btn):
   if btn == BTN_START:
@@ -100,6 +102,13 @@ def manageHat(hat, value):
     adapter.performAction(btnValue)
   except KeyError:
     print(f"Not managed hat {value}")
+
+def mapController():
+  if currentAdapter < 0: # Not initialized
+    pad.clear()
+  elif currentAdapter == 0: # No adapter
+    pad.clear()
+
 
 def main():
   print("!!!!!!!!!!!!!! START !!!!!!!!!!!!!!")
