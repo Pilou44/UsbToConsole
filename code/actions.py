@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+
+RELEASE_H = -2
+RELEASE_V = -1
+UP = 0
+DOWN = 1
+LEFT = 2
+RIGHT = 3
+BTN_START = 4
+BTN_MODE_SELECT = 5
+BTN_A = 6
+BTN_B = 7
+BTN_C_L = 8
+BTN_X = 9
+BTN_Y = 10
+BTN_Z_R = 11
+BTN_13 = 12
+BTN_14 = 13
