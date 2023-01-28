@@ -3,11 +3,10 @@
 # Import PyGame library
 import pygame
 import adapter
+import Pad3Bcontroller
 from actions import *
 
-PAD_3B_CONTROLLER_NAME = "3B controller"
-
-Pad3Bcontroller = { "1" : BTN_B, "2" : BTN_A, "5" : BTN_C_L, "9" : BTN_START, "0_-1" : LEFT, "0_1" : RIGHT, "0_0" : RELEASE_H, "1_-1" : UP, "1_1" : DOWN, "1_0" : RELEASE_V }
+controllers = { Pad3Bcontroller, }
 
 pad = {}
 
@@ -108,12 +107,10 @@ def main():
           joy = pygame.joystick.Joystick(event.device_index)
           joysticks[joy.get_instance_id()] = joy
           print(f"Joystick {joy.get_instance_id()} connected")
-          if (joy.get_name() == PAD_3B_CONTROLLER_NAME):
-            print(f"{joy.get_name()} connected")
-            pad.update(Pad3Bcontroller)
-          else:
-            print(f"Unknown gamepad")
-            pad.clear()
+          for controller in controllers:
+            if controller.name == joy.get_name():
+              print(f"{joy.get_name()} connected")
+              pad.update(controller.sega_md)
 
       if event.type == pygame.JOYDEVICEREMOVED:
         del joysticks[event.instance_id]
