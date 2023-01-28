@@ -10,9 +10,22 @@ MEGADRIVE = 0b001
 SUPER_NES = 0b010
 SATURN = 0b011
 
+IO_UP = 3
+IO_DOWN = 5
+IO_LEFT = 7
+IO_RIGHT = 8
+IO_BTN_START = 10
+IO_BTN_MODE_SELECT = 11
+IO_BTN_A = 12
+IO_BTN_B = 13
+IO_BTN_C_L = 15
+IO_BTN_X = 16
+IO_BTN_Y = 18
+IO_BTN_Z_R = 19
+
 run = False
 currentAdapter = NOT_INITIALIZED
-t1 = threading.Thread(target=pass)
+t1 = threading.Thread()
 
 def initGpio():
   GPIO.setup(IO_UP, GPIO.OUT, initial=GPIO.LOW)
@@ -29,9 +42,9 @@ def initGpio():
   GPIO.setup(IO_BTN_Z_R, GPIO.OUT, initial=GPIO.LOW)
 
 def readPadAdapter():
-  GPIO.setup(21, GPIO.IN)
-  GPIO.setup(22, GPIO.IN)
-  GPIO.setup(23, GPIO.IN)
+  GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+  GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+  GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
   d1 = 0
   d2 = 0
   d3 = 0
@@ -48,8 +61,10 @@ def notifyNewAdapter(adapter):
   print(f"Adapter = {bin(adapter)}")
 
 def main():
+  global run, currentAdapter
+  print(f"Start main {run}")
   while run:
-    adapter = readPadAdapter
+    adapter = readPadAdapter()
     if (adapter != currentAdapter):
       currentAdapter = adapter
       notifyNewAdapter(adapter)
@@ -57,16 +72,20 @@ def main():
 
 def stop():
   print("Stop thread")
+  global run, t1, currentAdapter
   run = False
   t1.join()
   currentAdapter = NOT_INITIALIZED
 
 def init():
+  global run, t1
   GPIO.setmode(GPIO.BOARD )
   initGpio()
   t1 = threading.Thread(target=main, args=())
-  print("Start thread")
+  run = True
+  print(f"Start thread {run}")
   t1.start()
 
 def getAdapter():
+  global currentAdapter
   return currentAdapter

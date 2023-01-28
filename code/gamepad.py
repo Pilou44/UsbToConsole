@@ -6,6 +6,7 @@ import pygame
 import RPi.GPIO as GPIO
 # Import the time library for time functions.
 #from time import sleep
+import adapter
 
 RELEASE_H = -2
 RELEASE_V = -1
@@ -195,10 +196,12 @@ def readPadAdapter():
 def main():
   print("!!!!!!!!!!!!!! START !!!!!!!!!!!!!!")
 
-  GPIO.setmode(GPIO.BOARD )
-  initGpio()
+  # GPIO.setmode(GPIO.BOARD )
+  # initGpio()
   # Read pad adapter
-  readPadAdapter()
+  # readPadAdapter()
+  adapter.init()
+  currentAdapter = adapter.currentAdapter
 
   # Initialize Joystick(s).
   pygame.init()
@@ -232,5 +235,10 @@ def main():
         del joysticks[event.instance_id]
         pad.clear()
         print(f"Joystick {event.instance_id} disconnected")
+
+    pluggedAdapter = adapter.currentAdapter
+    if pluggedAdapter != currentAdapter:
+      currentAdapter = pluggedAdapter
+      print(f"Adapter status changed: {currentAdapter}")
 
 main()
