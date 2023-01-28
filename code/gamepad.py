@@ -103,14 +103,46 @@ def manageHat(hat, value):
   except KeyError:
     print(f"Not managed hat {value}")
 
-def mapController():
-  if currentAdapter < 0: # Not initialized
+def checkConnections():
+  global currentAdapter
+  global currentGuid
+  foundGuid = False
+  if currentAdapter == NOT_INITIALIZED:
+    print(f"Adapter not initialized")
     pad.clear()
-  elif currentAdapter == 0: # No adapter
+  elif currentAdapter == NOT_CONNECTED:
+    print(f"No adapter connected")
     pad.clear()
+  elif currentGuid == "":
+    print(f"No controller connected")
+    pad.clear()
+  else
+    for controller in controllers:
+      if controller.guid == currentGuid:
+        foundGuid = True
+        print(f"{controller.name} connected")
+        mapController(controller)
+    if !foundGuid:
+      print(f"Unknown controller")
+      pad.clear()
 
+def mapController(controller): # Add try / catch if adapter not defined for controller
+  pad.clear()
+  if currentAdapter == adapter.MEGADRIVE:
+    print(f"Map for Sega Megadrive")
+    pad.update(controller.sega_md)
+  elif currentAdapter == adapter.SUPER_NES:
+    print(f"Map for Super Nintendo")
+    pad.update(controller.snes)
+  elif currentAdapter == adapter.SATURN:
+    print(f"Map for Sega Saturn")
+    pad.update(controller.saturn)
+  else:
+    print(f"Unknown adapter")
 
 def main():
+  global currentAdapter
+  global currentGuid
   print("!!!!!!!!!!!!!! START !!!!!!!!!!!!!!")
 
   adapter.init()
@@ -133,27 +165,24 @@ def main():
       if event.type == pygame.JOYBUTTONUP:
         releaseButton(f"{event.button}")
 
-      # Handle hotplugging
       if event.type == pygame.JOYDEVICEADDED:
-          # This event will be generated when the program starts for every
-          # joystick, filling up the list without needing to create them manually.
           joy = pygame.joystick.Joystick(event.device_index)
           joysticks[joy.get_instance_id()] = joy
           name = joy.get_name()
           print(f"Joystick {joy.get_instance_id()} connected\nname: {name}, id: {joy.get_id()}, guid: {joy.get_guid()}\naxes: {joy.get_numaxes()}, buttons: {joy.get_numbuttons()}, balls: {joy.get_numballs()}, hats: {joy.get_numhats()}")
-          for controller in controllers:
-            if controller.guid == joy.get_guid():
-              print(f"{joy.get_name()} connected")
-              pad.update(controller.sega_md)
+          currentGuid = joy.get_guid()
+          checkConnections()
 
       if event.type == pygame.JOYDEVICEREMOVED:
         del joysticks[event.instance_id]
-        pad.clear()
         print(f"Joystick {event.instance_id} disconnected")
+        currentGuid = ""
+        checkConnections()
 
     pluggedAdapter = adapter.currentAdapter
     if pluggedAdapter != currentAdapter:
-      currentAdapter = pluggedAdapter
       print(f"Adapter status changed: {currentAdapter}")
+      currentAdapter = pluggedAdapter
+      checkConnections()
 
 main()
