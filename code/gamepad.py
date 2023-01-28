@@ -3,10 +3,11 @@
 # Import PyGame library
 import pygame
 import adapter
-import Pad3Bcontroller
+import MD3Buttons
+import RetroflagSnes
 from actions import *
 
-controllers = { Pad3Bcontroller, }
+controllers = { MD3Buttons, RetroflagSnes, }
 
 pad = {}
 
@@ -71,19 +72,29 @@ def releaseButton(btn):
     print(f"Not managed key {btn}")
 
 def manageAxis(axis, value):
-  value = f"{axis}_{value}"
+  axisValue = f"{axis}_{value}"
   try:
-    btnValue = pad[value]
+    btnValue = pad[axisValue]
     action = getAxisAction(btnValue)
     print(f"{action}")
     adapter.performAction(btnValue)
   except KeyError:
-    print(f"Not managed axis {value}")
+    print(f"Not managed axis {axisValue}")
 
 def manageHat(hat, value):
-  value = f"H{hat}_{value}"
   try:
-    btnValue = pad[value]
+    first = value[0]
+    second = value[1]
+
+    fisrtHatValue = f"{hat}_1_{first}"
+    secondHatValue = f"{hat}_2_{second}"
+
+    btnValue = pad[fisrtHatValue]
+    action = getAxisAction(btnValue)
+    print(f"{action}")
+    adapter.performAction(btnValue)
+
+    btnValue = pad[secondHatValue]
     action = getAxisAction(btnValue)
     print(f"{action}")
     adapter.performAction(btnValue)
@@ -102,8 +113,7 @@ def main():
   while True:
     for event in pygame.event.get():
       if event.type == pygame.JOYHATMOTION:
-        manageHat(event.hat, round(event.value))
-        print(f"hat event hat: {event.hat}, value: {event.value}")
+        manageHat(event.hat, event.value)
 
       if event.type == pygame.JOYAXISMOTION:
         manageAxis(event.axis, round(event.value))
@@ -123,7 +133,7 @@ def main():
           name = joy.get_name()
           print(f"Joystick {joy.get_instance_id()} connected\nname: {name}, id: {joy.get_id()}, guid: {joy.get_guid()}\naxes: {joy.get_numaxes()}, buttons: {joy.get_numbuttons()}, balls: {joy.get_numballs()}, hats: {joy.get_numhats()}")
           for controller in controllers:
-            if controller.name == joy.get_name():
+            if controller.guid == joy.get_guid():
               print(f"{joy.get_name()} connected")
               pad.update(controller.sega_md)
 
