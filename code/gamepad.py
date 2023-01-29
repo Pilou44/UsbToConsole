@@ -107,22 +107,22 @@ def checkConnections():
   global currentAdapter
   global currentGuid
   foundGuid = False
-  if currentAdapter == NOT_INITIALIZED:
+  if currentAdapter == adapter.NOT_INITIALIZED:
     print(f"Adapter not initialized")
     pad.clear()
-  elif currentAdapter == NOT_CONNECTED:
+  elif currentAdapter == adapter.NOT_CONNECTED:
     print(f"No adapter connected")
     pad.clear()
   elif currentGuid == "":
     print(f"No controller connected")
     pad.clear()
-  else
+  else:
     for controller in controllers:
       if controller.guid == currentGuid:
         foundGuid = True
         print(f"{controller.name} connected")
         mapController(controller)
-    if !foundGuid:
+    if foundGuid == False:
       print(f"Unknown controller")
       pad.clear()
 
@@ -181,7 +181,7 @@ def main():
 
     pluggedAdapter = adapter.currentAdapter
     if pluggedAdapter != currentAdapter:
-      print(f"Adapter status changed: {currentAdapter}")
+      print(f"Adapter status changed: {pluggedAdapter}")
       currentAdapter = pluggedAdapter
       checkConnections()
 

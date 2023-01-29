@@ -23,6 +23,8 @@ IO_BTN_C_L = 15
 IO_BTN_X = 16
 IO_BTN_Y = 18
 IO_BTN_Z_R = 19
+IO_BTN_13 = 26
+IO_BTN_14 = 29
 
 run = False
 currentAdapter = NOT_INITIALIZED
@@ -41,6 +43,8 @@ def initGpio():
   GPIO.setup(IO_BTN_X, GPIO.OUT, initial=GPIO.LOW)
   GPIO.setup(IO_BTN_Y, GPIO.OUT, initial=GPIO.LOW)
   GPIO.setup(IO_BTN_Z_R, GPIO.OUT, initial=GPIO.LOW)
+  GPIO.setup(IO_BTN_13, GPIO.OUT, initial=GPIO.LOW)
+  GPIO.setup(IO_BTN_14, GPIO.OUT, initial=GPIO.LOW)
 
 def getBtnGpio(btn):
   if btn == BTN_START:
