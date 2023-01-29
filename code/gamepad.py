@@ -128,17 +128,20 @@ def checkConnections():
 
 def mapController(controller): # Add try / catch if adapter not defined for controller
   pad.clear()
-  if currentAdapter == adapter.MEGADRIVE:
-    print(f"Map for Sega Megadrive")
-    pad.update(controller.sega_md)
-  elif currentAdapter == adapter.SUPER_NES:
-    print(f"Map for Super Nintendo")
-    pad.update(controller.snes)
-  elif currentAdapter == adapter.SATURN:
-    print(f"Map for Sega Saturn")
-    pad.update(controller.saturn)
-  else:
-    print(f"Unknown adapter")
+  try:
+    if currentAdapter == adapter.MEGADRIVE:
+      print(f"Map for Sega Megadrive")
+      pad.update(controller.sega_md)
+    elif currentAdapter == adapter.SUPER_NES:
+      print(f"Map for Super Nintendo")
+      pad.update(controller.snes)
+    elif currentAdapter == adapter.SATURN:
+      print(f"Map for Sega Saturn")
+      pad.update(controller.saturn)
+    else:
+      print(f"Unknown adapter")
+  except AttributeError:
+    print(f"Controller not usable with this adapter")
 
 def main():
   global currentAdapter
