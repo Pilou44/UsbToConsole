@@ -112,20 +112,15 @@ def readPadAdapter():
   value = (d3 << 2) | (d2 << 1) | d1
   return value
 
-def notifyNewAdapter(adapter):
-  print(f"New adapter = {bin(adapter)}")
-
 def main():
   global run, currentAdapter
   while run:
     adapter = readPadAdapter()
     if (adapter != currentAdapter):
       currentAdapter = adapter
-      notifyNewAdapter(adapter)
     sleep(0.5)
 
 def stop():
-  print("Stop thread")
   global run, t1, currentAdapter
   run = False
   t1.join()
@@ -137,7 +132,6 @@ def init():
   initGpio()
   t1 = threading.Thread(target=main, daemon=True)
   run = True
-  print(f"Start thread {run}")
   t1.start()
 
 def getAdapter():

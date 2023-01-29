@@ -8,6 +8,8 @@ import RetroflagSnes
 import ArduinoMicro
 from actions import *
 
+import logger
+
 controllers = { MD3Buttons, RetroflagSnes, ArduinoMicro, }
 
 pad = {}
@@ -16,75 +18,33 @@ joysticks = {}
 currentGuid = ""
 currentAdapter = -1
 
-def getBtnName(btn):
-  if btn == BTN_START:
-    return "Start"
-  elif btn == BTN_MODE_SELECT:
-    return "Mode / Select"
-  elif btn == BTN_A:
-    return "A"
-  elif btn == BTN_B:
-    return "B"
-  elif btn == BTN_C_L:
-    return "C / L"
-  elif btn == BTN_X:
-    return "X"
-  elif btn == BTN_Y:
-    return "Y"
-  elif btn == BTN_Z_R:
-    return "Z / R"
-  elif btn == BTN_13:
-    return "13"
-  elif btn == BTN_14:
-    return "14"
-  else:
-    return "Not assigned"
-
-def getAxisAction(value):
-  if value == LEFT:
-    return "Press left\nRelease right"
-  elif value == RIGHT:
-    return "Release left\nPress right"
-  elif value == RELEASE_H:
-    return "Release left\nRelease right"
-  elif value == UP:
-    return "Press up\nRelease down"
-  elif value == DOWN:
-    return "Release up\nPress down"
-  elif value == RELEASE_V:
-    return "Release up\nRelease down"
-  else:
-    return f"Not assigned {value}"
-
 def pressButton(btn):
   try:
+    logger.debug(f"Button {btn} pressed.")
     btnValue = pad[btn]
-    btnName = getBtnName(btnValue)
-    print(f"Joystick button {btnName} pressed.")
     adapter.pressButton(btnValue)
   except KeyError:
-    print(f"Not managed key {btn}")
+    logger.debug("Button not managed")
 
 def releaseButton(btn):
   try:
+    logger.debug(f"Button {btn} released.")
     btnValue = pad[btn]
-    btnName = getBtnName(btnValue)
-    print(f"Joystick button {btnName} released.")
     adapter.releaseButton(btnValue)
   except KeyError:
-    print(f"Not managed key {btn}")
+    logger.debug("Button not managed")
 
 def manageAxis(axis, value):
+  logger.debug(f"Axis change: axis: {axis} value: {value}")
   axisValue = f"{axis}_{value}"
   try:
     btnValue = pad[axisValue]
-    action = getAxisAction(btnValue)
-    print(f"{action}")
     adapter.performAction(btnValue)
   except KeyError:
-    print(f"Not managed axis {axisValue}")
+    logger.debug("Axis not managed.")
 
 def manageHat(hat, value):
+  logger.debug(f"Hat change: hat: {hat} value: {value}")
   try:
     first = value[0]
     second = value[1]
@@ -93,61 +53,57 @@ def manageHat(hat, value):
     secondHatValue = f"{hat}_2_{second}"
 
     btnValue = pad[fisrtHatValue]
-    action = getAxisAction(btnValue)
-    print(f"{action}")
     adapter.performAction(btnValue)
 
     btnValue = pad[secondHatValue]
-    action = getAxisAction(btnValue)
-    print(f"{action}")
     adapter.performAction(btnValue)
   except KeyError:
-    print(f"Not managed hat {value}")
+    logger.debug("Hat not managed.")
 
 def checkConnections():
   global currentAdapter
   global currentGuid
   foundGuid = False
   if currentAdapter == adapter.NOT_INITIALIZED:
-    print(f"Adapter not initialized")
+    logger.info(f"Adapter not initialized")
     pad.clear()
   elif currentAdapter == adapter.NOT_CONNECTED:
-    print(f"No adapter connected")
+    logger.info(f"No adapter connected")
     pad.clear()
   elif currentGuid == "":
-    print(f"No controller connected")
+    logger.info(f"No controller connected")
     pad.clear()
   else:
     for controller in controllers:
       if controller.guid == currentGuid:
         foundGuid = True
-        print(f"{controller.name} connected")
+        logger.info(f"{controller.name} connected")
         mapController(controller)
     if foundGuid == False:
-      print(f"Unknown controller")
+      logger.info(f"Unknown controller")
       pad.clear()
 
 def mapController(controller): # Add try / catch if adapter not defined for controller
   pad.clear()
   try:
     if currentAdapter == adapter.MEGADRIVE:
-      print(f"Map for Sega Megadrive")
+      logger.info(f"Map for Sega Megadrive")
       pad.update(controller.sega_md)
     elif currentAdapter == adapter.SUPER_NES:
-      print(f"Map for Super Nintendo")
+      logger.info(f"Map for Super Nintendo")
       pad.update(controller.snes)
     elif currentAdapter == adapter.SATURN:
-      print(f"Map for Sega Saturn")
+      logger.info(f"Map for Sega Saturn")
       pad.update(controller.saturn)
     else:
-      print(f"Unknown adapter")
+      logger.info(f"Unknown adapter")
   except AttributeError:
-    print(f"Controller not usable with this adapter")
+    logger.warning(f"Controller not usable with this adapter")
 
 def main():
   global currentAdapter
   global currentGuid
-  print("!!!!!!!!!!!!!! START !!!!!!!!!!!!!!")
+  logger.info("!!!!!!!!!!!!!! START !!!!!!!!!!!!!!")
 
   adapter.init()
   currentAdapter = adapter.currentAdapter
@@ -173,19 +129,19 @@ def main():
           joy = pygame.joystick.Joystick(event.device_index)
           joysticks[joy.get_instance_id()] = joy
           name = joy.get_name()
-          print(f"Joystick {joy.get_instance_id()} connected\nname: {name}, id: {joy.get_id()}, guid: {joy.get_guid()}\naxes: {joy.get_numaxes()}, buttons: {joy.get_numbuttons()}, balls: {joy.get_numballs()}, hats: {joy.get_numhats()}")
+          logger.debug(f"Joystick {joy.get_instance_id()} connected\nname: {name}, id: {joy.get_id()}, guid: {joy.get_guid()}\naxes: {joy.get_numaxes()}, buttons: {joy.get_numbuttons()}, balls: {joy.get_numballs()}, hats: {joy.get_numhats()}")
           currentGuid = joy.get_guid()
           checkConnections()
 
       if event.type == pygame.JOYDEVICEREMOVED:
         del joysticks[event.instance_id]
-        print(f"Joystick {event.instance_id} disconnected")
+        logger.debug(f"Joystick {event.instance_id} disconnected")
         currentGuid = ""
         checkConnections()
 
     pluggedAdapter = adapter.currentAdapter
     if pluggedAdapter != currentAdapter:
-      print(f"Adapter status changed: {pluggedAdapter}")
+      logger.debug(f"Adapter status changed: {pluggedAdapter}")
       currentAdapter = pluggedAdapter
       checkConnections()
 
