@@ -2,7 +2,7 @@
 
 import sys
 import logging
-logging.basicConfig(filename='gamepad.log', encoding='utf-8', level=logging.DEBUG)
+logging.basicConfig(filename='/home/wechantloup/gamepad/gamepad.log', encoding='utf-8', level=logging.DEBUG)
 
 handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.DEBUG)
