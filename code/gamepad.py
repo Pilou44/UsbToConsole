@@ -5,9 +5,10 @@ import pygame
 import adapter
 import MD3Buttons
 import RetroflagSnes
+import ArduinoMicro
 from actions import *
 
-controllers = { MD3Buttons, RetroflagSnes, }
+controllers = { MD3Buttons, RetroflagSnes, ArduinoMicro, }
 
 pad = {}
 joysticks = {}
